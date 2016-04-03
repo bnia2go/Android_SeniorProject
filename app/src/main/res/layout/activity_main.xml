@@ -10,40 +10,27 @@
     tools:context="com.example.nia.groupproject_sojourner.MainActivity">
 
     <TextView
-        android:text="SNAKE"
+        android:text="NIX"
         android:textColor="#996633"
         android:id="@+id/label"
-        android:layout_margin="30sp"
-        android:layout_marginTop="70sp"
-        android:textSize="70sp"
+        android:layout_margin="100sp"
+        android:textSize="90sp"
         android:gravity="center"
-        android:layout_width="match_parent"
-        android:layout_height="200px"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
     />
 
     <Button
         android:text="PLAY"
         android:id="@+id/playButton"
-        android:textSize="15dp"
+        android:textSize="55dp"
         android:layout_below="@id/label"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
+        android:background="#889933"
         android:onClick="playGame"
     />
-
-    <Button
-        android:text="User Stats"
-        android:id="@+id/userStatButton"
-        android:textSize="15dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="300dp"
-        android:layout_below="@+id/amount_total"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:onClick="goUserStat"
-        />
-
 
 </RelativeLayout>

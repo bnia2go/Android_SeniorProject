@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/GroupProject_Sojourner.iml" filepath="$PROJECT_DIR$/GroupProject_Sojourner.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Android_SeniorProject.iml" filepath="$PROJECT_DIR$/Android_SeniorProject.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

@@ -1,270 +1,147 @@
 package com.example.nia.groupproject_sojourner;
 
+import android.graphics.Point;
+import android.util.Log;
+import java.util.ArrayDeque;
 /**
- * Created by Nia on 1/2/2016.
+ * Created by Nia on 3/4/2016.
  */
-import android.graphics.Rect;
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.view.View;
-
-import java.util.Random;
-
-public class SnakeModel extends View {
-
-    //width and height of snakeView layout
-    private final int B_WIDTH = 300;
-    private final int B_HEIGHT = 300;
-
-    private int [][] game;
-    //dot size
-    private final int DOT_SIZE = 10;
-    //technically the end of the game is when all the dots take up the entire space on the screen
-    //which is B_WIDTH x B_HEIGHT = 300 x 300 = 900
-    private final int ALL_DOTS = 900;
-
-    //used to randomly position apple on snakeView layout
-    private final int RAND_POS = 29;
-    //millisec
-    private final int DELAY = 100;
-
-    //used to keep track of all the dots x and y positions
-    private final int x[] = new int[ALL_DOTS];
-    private final int y[] = new int[ALL_DOTS];
-
-    private ImageView dots;
-    private ImageView apple_x;
-    private ImageView apple_y;
-
-    private boolean leftDirection = false;
-    private boolean rightDirection = true;
-    private boolean upDirection = false;
-    private boolean downDirection = false;
-    private boolean inGame = true;
-
-    //private Timer timer;
-    //private Image ball;
-    //private Image apple;
-    //private Image head;
-
-    private Paint paint;
-    private Bitmap head;
-    private Rect snakeBoard;
-
-    public SnakeModel(Context context) {
-        super(context);
-        snakeBoard = new Rect(B_WIDTH, B_HEIGHT);
-        paint = new Paint();
-        paint.setColor(0x00FF0000);
-        paint.setAntiAlias(true);
-        paint.setStrokeWidth(10.0f);
 
 
-        /*
-        addKeyListener(new TAdapter());
-        setBackground(Color.black);
-        setFocusable(true);
+public class SnakeModel {
+    //for clock
+    private boolean slowMotion = false;
+    private double delay;
+    private int cc;
 
-        setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
-        loadImages();
-        initGame();*/
+    //pace of snake
+    private final static int PACE_STYLE = 30;
+    private final static int SLOW_MO_DELAY = GameThread.getFps() / 5;
+    private ArrayDeque<FreeCell> fcs;
+    private FreeCell lastTail;
+    private int rad;
+    private double lastPace, nextMPace, mDelay;
+    private boolean paceIncreased;
+    private WhichWay goThisWay;
+    private int stillAlive;
+    private int currentScore;
+    private boolean notProtected = false;
 
+
+    private boolean getPics;
+
+    public SnakeModel(int rad, boolean getPics){
+        this.rad = rad;
+        fcs = new ArrayDeque<FreeCell>();
+        fcs.addLast(new FreeCell(3,2,rad));
+        fcs.addLast(new FreeCell(2,2,rad));
+        fcs.addLast(new FreeCell(1,2,rad));
+
+        double startPaceDelay = nextMPace = SLOW_MO_DELAY;
+        lastPace = startPaceDelay / 3;
+        mDelay = (startPaceDelay - lastPace) / PACE_STYLE;
+        paceIncreased = false;
+
+        goThisWay = WhichWay.RIGHT;
+        stillAlive = 10;
+        currentScore = 0;
+
+        this.getPics = getPics;
     }
 
-    public void onDraw(Canvas canvas){
-        super.onDraw(canvas);
-        canvas.drawRect(snakeBoard, paint);
-    }
-/*
-    private void loadImages() {
-
-        ImageIcon iid = new ImageIcon("dot.png");
-        ball = iid.getImage();
-
-        ImageIcon iia = new ImageIcon("apple.png");
-        apple = iia.getImage();
-
-        ImageIcon iih = new ImageIcon("head.png");
-        head = iih.getImage();
+    private void hitMyself(){
+        for(FreeCell freeCell: fcs)
+            if(freeCell != getSnakeHead() && freeCell.getPointLoc().equals(getSnakeHead().getPointLoc()))
+                if(getNotProtected()){
+                    setNotProtected(false);
+                } else
+                    destroyIt();
     }
 
-    private void initGame() {
+    public boolean sayAh(AddedObjects aob){
+        return getSnakeHead().getPointLoc().equals(aob.getPointLoc());
+    }
 
-        dots = 3;
+    public void increaseSize (){ fcs.addLast(new FreeCell(lastTail));}
 
-        for (int z = 0; z < dots; z++) {
-            x[z] = 50 - z * 10;
-            y[z] = 50;
+    public void moveIt(){
+        //location of snake head
+        Point top = getSnakeHead().getPointLoc();
+
+        //insert new freecell behind head
+        switch(goThisWay){
+            case UP:
+                fcs.addFirst(new FreeCell(top.x, top.y -1, rad));
+                break;
+            case DOWN:
+                fcs.addFirst(new FreeCell(top.x, top.y +1, rad));
+                break;
+            case RIGHT:
+                fcs.addFirst(new FreeCell(top.x + 1, top.y, rad));
+                break;
+            case LEFT:
+                fcs.addFirst(new FreeCell(top.x - 1, top.y, rad));
+                break;
         }
 
-        locateApple();
+        lastTail = fcs.removeLast();
+        //after removing last freecell and saving it, check if you hit yourself
+        hitMyself();
 
-        timer = new Timer(DELAY, this);
-        timer.start();
     }
 
-    @Override
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
+    public void incrementPace(){
+        if(!slowMotion){
+            nextMPace -= mDelay;
+            if(nextMPace < lastPace)
+                nextMPace = lastPace;
 
-        doDrawing(g);
-    }
-
-    private void doDrawing(Graphics g) {
-
-        if (inGame) {
-
-            g.drawImage(apple, apple_x, apple_y, this);
-
-            for (int z = 0; z < dots; z++) {
-                if (z == 0) {
-                    g.drawImage(head, x[z], y[z], this);
-                } else {
-                    g.drawImage(ball, x[z], y[z], this);
-                }
-            }
-
-            Toolkit.getDefaultToolkit().sync();
-
-        } else {
-
-            gameOver(g);
+            paceIncreased = false;
         }
     }
 
-    private void gameOver(Graphics g) {
+    public void startTimer(){
+        if(!slowMotion)
+            delay = nextMPace;
+        nextMPace = SLOW_MO_DELAY;
 
-        String msg = "Game Over";
-        Font small = new Font("Helvetica", Font.BOLD, 14);
-        FontMetrics metr = getFontMetrics(small);
-
-        g.setColor(Color.white);
-        g.setFont(small);
-        g.drawString(msg, (B_WIDTH - metr.stringWidth(msg)) / 2, B_HEIGHT / 2);
+        cc = PaceClock.getEffDur();
+        slowMotion = true;
     }
 
-    private void checkApple() {
-
-        if ((x[0] == apple_x) && (y[0] == apple_y)) {
-
-            dots++;
-            locateApple();
-        }
-    }
-
-    private void move() {
-
-        for (int z = dots; z > 0; z--) {
-            x[z] = x[(z - 1)];
-            y[z] = y[(z - 1)];
-        }
-
-        if (leftDirection) {
-            x[0] -= DOT_SIZE;
-        }
-
-        if (rightDirection) {
-            x[0] += DOT_SIZE;
-        }
-
-        if (upDirection) {
-            y[0] -= DOT_SIZE;
-        }
-
-        if (downDirection) {
-            y[0] += DOT_SIZE;
-        }
-    }
-
-    private void checkCollision() {
-
-        for (int z = dots; z > 0; z--) {
-
-            if ((z > 4) && (x[0] == x[z]) && (y[0] == y[z])) {
-                inGame = false;
+    public void updateTimer(){
+        if(slowMotion){
+            cc--;
+            if(cc == 0){
+                slowMotion = false;
+                nextMPace = delay;  //resume normal speed
             }
         }
-
-        if (y[0] >= B_HEIGHT) {
-            inGame = false;
-        }
-
-        if (y[0] < 0) {
-            inGame = false;
-        }
-
-        if (x[0] >= B_WIDTH) {
-            inGame = false;
-        }
-
-        if (x[0] < 0) {
-            inGame = false;
-        }
-
-        if(!inGame) {
-            timer.stop();
-        }
     }
 
-    private void locateApple() {
-
-        int r = (int) (Math.random() * RAND_POS);
-        apple_x = ((r * DOT_SIZE));
-
-        r = (int) (Math.random() * RAND_POS);
-        apple_y = ((r * DOT_SIZE));
+    public void increaseScore( int sc){
+        this.currentScore = sc;
     }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-        if (inGame) {
-
-            checkApple();
-            checkCollision();
-            move();
-        }
-
-        repaint();
+    public void setNotProtected( boolean check){ this.notProtected = check;}
+    public boolean getNotProtected(){ return notProtected; }
+    public FreeCell getSnakeHead(){ return fcs.peekFirst();}
+    public ArrayDeque<FreeCell> getFreeCells(){ return fcs;}
+    public WhichWay moveThisWay() {
+        return goThisWay;
     }
+    public void setWhichWay(WhichWay goHere){ this.goThisWay = goHere;}
 
-    //Tadapter extends KeyAdapter
-    private class OnSwipeTouchListener extends OnTouchListener {
+    public int getPaceDelay(){return (int)Math.round(nextMPace);}
+    public boolean increasePace(){ return paceIncreased;}
+    public boolean isHorizontal(){ return goThisWay.isHoriz();}
+    public boolean isVertical(){ return goThisWay.isVert();}
+    public void enablePaceIncrementFg(){ paceIncreased = true;}
 
-        @Override
-        public void keyPressed(KeyEvent e) {
+    public int getSlowedPaceRemain(){ return cc;}
+    public boolean checkDead(){return stillAlive == 0; }
+    public boolean checkUsingPics(){ return getPics;}
+    public void destroyIt(){ stillAlive = 0;}
+    public void resurrect(){stillAlive = 10;}
+    public int getCurrScore(){ return currentScore;}
 
-            int key = e.getKeyCode();
-
-            if ((key == KeyEvent.VK_LEFT) && (!rightDirection)) {
-                leftDirection = true;
-                upDirection = false;
-                downDirection = false;
-            }
-
-            if ((key == KeyEvent.VK_RIGHT) && (!leftDirection)) {
-                rightDirection = true;
-                upDirection = false;
-                downDirection = false;
-            }
-
-            if ((key == KeyEvent.VK_UP) && (!downDirection)) {
-                upDirection = true;
-                rightDirection = false;
-                leftDirection = false;
-            }
-
-            if ((key == KeyEvent.VK_DOWN) && (!upDirection)) {
-                downDirection = true;
-                rightDirection = false;
-                leftDirection = false;
-            }
-        }
-    }*/
 }
-
-
