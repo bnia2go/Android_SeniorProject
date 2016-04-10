@@ -14,7 +14,7 @@ public class AddedObjects {
     protected ObjectType obj;
 
     public enum ObjectType {
-        FOOD, TIMER, PROS
+        FOOD, TIMER
     }
 
     public AddedObjects(int radius){

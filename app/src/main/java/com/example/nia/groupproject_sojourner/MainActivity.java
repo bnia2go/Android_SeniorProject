@@ -17,14 +17,14 @@ public class MainActivity extends Activity {
     private GamePlay gamePlay;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         gamePlay = new GamePlay(this);
         setContentView(R.layout.activity_main);
     }
 
-    protected void onRestart()
+    public void onRestart()
     {
         if(gamePlay != null)
             gamePlay.initGame();

@@ -42,20 +42,20 @@ public class SnakeModel {
         mDelay = (startPaceDelay - lastPace) / PACE_STYLE;
         paceIncreased = false;
 
-        goThisWay = WhichWay.RIGHT;
+        goThisWay = WhichWay.DOWN;
         stillAlive = 10;
         currentScore = 0;
 
         this.getPics = getPics;
     }
 
-    private void hitMyself(){
+    private void hitMyself()
+    {
         for(FreeCell freeCell: fcs)
-            if(freeCell != getSnakeHead() && freeCell.getPointLoc().equals(getSnakeHead().getPointLoc()))
-                if(getNotProtected()){
-                    setNotProtected(false);
-                } else
-                    destroyIt();
+        {
+            if (freeCell != getSnakeHead() && freeCell.getPointLoc().equals(getSnakeHead().getPointLoc()))
+                destroyIt();
+        }
     }
 
     public boolean sayAh(AddedObjects aob){
@@ -120,7 +120,7 @@ public class SnakeModel {
     }
 
     public void increaseScore( int sc){
-        this.currentScore = sc;
+        this.currentScore += sc;
     }
     public void setNotProtected( boolean check){ this.notProtected = check;}
     public boolean getNotProtected(){ return notProtected; }

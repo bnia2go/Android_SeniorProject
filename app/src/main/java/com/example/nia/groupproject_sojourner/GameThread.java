@@ -33,7 +33,7 @@ public class GameThread extends  Thread {
         super();
         this.surfaceHolder = surfaceHolder;
         this.gamePlay = gamePlay;
-        running = true;
+        //running = true;
     }
 
     public static void setRunning(boolean running) {
@@ -61,7 +61,7 @@ public class GameThread extends  Thread {
                     skipFrame = 0;
                     // update state
                     this.gamePlay.update();
-                    this.gamePlay.render(canvas);
+                    this.gamePlay.instantDisplay(canvas);
 
                     timeExec = System.currentTimeMillis() - startTime;
 
@@ -83,7 +83,7 @@ public class GameThread extends  Thread {
                     }
 
                     if (skipFrame > 0)
-                        Log.v(TAG, "Skipped " + skipFrame + "frames");
+                        Log.v(TAG, "Skipped " + skipFrame + " frames");
                 }
             } finally {
                 if (canvas != null)

@@ -53,12 +53,6 @@ import java.util.Random;
  * Created by Nia on 12/5/2015.
  */
 public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, TouchInterface {
-    private static final int CHERRY_PERCENT = 20;
-    private static final int BANANA_PERCENT = 5;
-
-    private static final int TIME_PERCENT = 2;
-    private static final int OTHER_PERCENT = 1;
-
 
     private GameThread snakeThread;
     private Context snakeContext;
@@ -70,7 +64,7 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
     private int freeCellD, freeCellR;
     private SnakeModel sm;
     private Food food;
-    private UniqueClass uniqueClass;  //SpecialElement
+    private UniqueClass uniqueClass;
 
     private String highScoreKey = "highScore";
     private long hs;
@@ -97,6 +91,7 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
+
         initGame();
     }
 
@@ -108,7 +103,7 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
 
         //stop and clean up thread
-        boolean startAgain = false;
+        boolean startAgain = true;
         snakeThread.setRunning(false);
         while (startAgain) {
             try {
@@ -153,6 +148,7 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         newFood();
         // start game loop gameThread
         snakeThread = new GameThread(getHolder(), this);
+        snakeThread.setRunning(true);
         snakeThread.start();
     }
 
@@ -201,8 +197,8 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
             // else :
             // - update score if it hasn't been updated
             if (!sm.checkDead()) {
-                sm.moveIt(); //
                 ateItsFood();
+                sm.moveIt(); //
                 updateUniqueClass();
             } else {
                 if (!updateHighScore) {
@@ -273,11 +269,11 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
 
     private void newFood() {
         Random randomLocation = new Random();
-        int change = randomLocation.nextInt(90) + 1;
+        int change = randomLocation.nextInt(89) + 1;
 
-        if (change <= CHERRY_PERCENT)
+        if (change <= 20)
             food = new Cherry(pointHere, sm, freeCellR);
-        else if (CHERRY_PERCENT < change && change <= CHERRY_PERCENT + BANANA_PERCENT)
+        else if (20 < change && change <= 20 + 5)
             food = new Banana(pointHere, sm, freeCellR);
         else
             food = new Lime(pointHere, sm, freeCellR);
@@ -288,7 +284,9 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
             Random random = new Random();
             int num = random.nextInt(90) + 1;
 
-            if (num <= TIME_PERCENT)
+            if (num <= 2)
+                uniqueClass = new PaceClock(pointHere, sm, freeCellR);
+            else if(2 < num && num <= 3 )
                 uniqueClass = new PaceClock(pointHere, sm, freeCellR);
         } else if (sm.sayAh(uniqueClass)) {
             if(uniqueClass.getType() == AddedObjects.ObjectType.TIMER)
@@ -334,8 +332,10 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         }
     }
 
-    public void ateItsFood() {
-        if (sm.sayAh(food)) {
+    public void ateItsFood()
+    {
+        if (sm.sayAh(food))
+        {
             sm.increaseSize();
             sm.enablePaceIncrementFg();
             sm.increaseScore(food.getScore());
@@ -358,10 +358,12 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
     }
 
     /**
-     * Game draw method.
+     * Draw Elements of Game
      */
-    public void render(Canvas canvas) {
+    public void instantDisplay(Canvas canvas) {
         //gamePlayBoard around gameplay view
+        drawBackground(canvas);
+
         drawLining(canvas);
 
         drawFood(canvas);
@@ -404,7 +406,7 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
     }
 
     private void drawFood(Canvas canvas) {
-        Bitmap bitmap;
+        Bitmap treat;
         //Possible foods
         // Banana
         // Cherry
@@ -412,19 +414,23 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
 
         if(food instanceof Banana)
         {
-            bitmap = food2;
+            treat = food2;
+            Log.i("","FOOD IS BANANA!");
         } else if(food instanceof Cherry)
         {
-            bitmap = food1;
+            treat = food1;
+            Log.i("","FOOD IS CHERRY!");
         } else if(food instanceof Lime)
         {
-            bitmap = food3;
+            treat = food3;
+            Log.i("","FOOD IS LIME!");
         } else
         {
-            bitmap = gamePlayBoard;
+            treat = gamePlayBoard;
+            Log.i("","FOOD IS not!");
         }
 
-        drawFreeCell(canvas, food.getPointLoc(), bitmap);
+        drawFreeCell(canvas, food.getPointLoc(), treat);
     }
 
     private void drawUniqueClass(Canvas canvas) {
@@ -432,27 +438,36 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
             if (uniqueClass.getType() == AddedObjects.ObjectType.TIMER)
                 // draw timer
                 drawFreeCell(canvas, uniqueClass.getPointLoc(), timer);
+            else
+                drawFreeCell(canvas, uniqueClass.getPointLoc(), timer);
         }
     }
 
     private void drawNix(Canvas canvas) {
         if (sm.checkUsingPics()) {
             for (FreeCell freeCell : sm.getFreeCells())
-                if (sm.getNotProtected())
+                if(sm.getNotProtected())
                     drawFreeCell(canvas, freeCell.getPointLoc(), scale);
                 else
                     drawFreeCell(canvas, freeCell.getPointLoc(), scale);
-        } else {
+        }
+        else {
             paintSnake.setColor(Color.BLACK);
 
             for (FreeCell freeCell : sm.getFreeCells()) {
                 Point p = freeCell.getPointLoc();
 
-                int x = freeCellR + p.x * freeCellD;
-                int y = freeCellR + p.y * freeCellD;
+                int x = freeCellR - p.x * freeCellD;
+                int y = freeCellR - p.y * freeCellD;
                 canvas.drawCircle(x, y, freeCellR, paintSnake);
             }
         }
+    }
+
+    private void drawBackground(Canvas canvas) {
+        paintSnake.setColor(Color.BLACK);
+
+        canvas.drawRect(0, 0, pointHere.x * freeCellD, pointHere.y * freeCellD, paintSnake);
     }
 
     private void drawPoints(Canvas canvas) {
@@ -481,7 +496,7 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         int topPadding = getHeight() / 2 - text.length * textSize;
 
         paintSnake.setTextSize(textSize);
-        paintSnake.setColor(Color.YELLOW);
+        paintSnake.setColor(Color.rgb(255,255,102));
         canvas.drawText(text[0], leftPadding, topPadding + textSize, paintSnake);
         canvas.drawText(text[1], leftPadding, topPadding + 2 * textSize, paintSnake);
     }
