@@ -14,9 +14,9 @@ public class UniqueClass extends AddedObjects {
 
     private boolean isGone;
 
-    public UniqueClass(Point pd, SnakeModel snake, int radius, int timeDur){
+    public UniqueClass(Point pd, SnakeModel sm, int radius, int timeDur){
         super(radius);
-        getNewLocation(pd, snake);
+        getNewLocation(pd, sm);
         TIME_LASTING = timeDur;
         resetTimer();
     }

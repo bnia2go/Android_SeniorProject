@@ -72,7 +72,7 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
 
     private Bitmap gamePlayBoard, snakeProtected;
     private Bitmap background;
-    private Bitmap food1, food2, food3;
+    private Bitmap cherry, banana, lime;
     private Bitmap timer, scale;
 
     public GamePlay(Context snakeContext) {
@@ -119,9 +119,9 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         gamePlayBoard = BitmapFactory.decodeResource(getResources(), R.drawable.border);
         scale = BitmapFactory.decodeResource(getResources(), R.drawable.scale);
         timer = BitmapFactory.decodeResource(getResources(), R.drawable.clock);
-        food1 = BitmapFactory.decodeResource(getResources(), R.drawable.cherry);
-        food2 = BitmapFactory.decodeResource(getResources(), R.drawable.banana);
-        food3 = BitmapFactory.decodeResource(getResources(), R.drawable.lime);
+        cherry = BitmapFactory.decodeResource(getResources(), R.drawable.cherry);
+        banana = BitmapFactory.decodeResource(getResources(), R.drawable.banana);
+        lime = BitmapFactory.decodeResource(getResources(), R.drawable.lime);
 
     }
 
@@ -144,7 +144,7 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         int boardHeight = 1500 / freeCellD;
         pointHere = new Point(boardWidth, boardHeight);
 
-        sm = new SnakeModel(freeCellR, (gamePlayBoard != null && scale != null && food1 != null));
+        sm = new SnakeModel(freeCellR, (gamePlayBoard != null && scale != null && cherry != null));
         newFood();
         // start game loop gameThread
         snakeThread = new GameThread(getHolder(), this);
@@ -198,7 +198,7 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
             // - update score if it hasn't been updated
             if (!sm.checkDead()) {
                 ateItsFood();
-                sm.moveIt(); //
+                sm.moveIt();
                 updateUniqueClass();
             } else {
                 if (!updateHighScore) {
@@ -268,12 +268,12 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
     }
 
     private void newFood() {
-        Random randomLocation = new Random();
-        int change = randomLocation.nextInt(89) + 1;
+        Random pickFood = new Random();
+        int pick = pickFood.nextInt(3);
 
-        if (change <= 20)
+        if (pick <= 1)
             food = new Cherry(pointHere, sm, freeCellR);
-        else if (20 < change && change <= 20 + 5)
+        else if (pick == 2)
             food = new Banana(pointHere, sm, freeCellR);
         else
             food = new Lime(pointHere, sm, freeCellR);
@@ -361,21 +361,26 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
      * Draw Elements of Game
      */
     public void instantDisplay(Canvas canvas) {
-        //gamePlayBoard around gameplay view
-        drawBackground(canvas);
 
+        //background
+        placeBoardDesign(canvas);
+
+        //gamePlayBoard around gameplay view
         drawLining(canvas);
 
-        drawFood(canvas);
+        checkFoodGroup(canvas);
 
-        drawUniqueClass(canvas);
+        getUniqueClass(canvas);
 
         drawNix(canvas);
 
-        drawPoints(canvas);
+        displayPoints(canvas);
 
+        //display crash message if Nix died
         if (sm.checkDead())
+        {
             displayAlert(canvas);
+        }
     }
 
     //where to draw each AddedObject Type
@@ -405,26 +410,29 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         }
     }
 
-    private void drawFood(Canvas canvas) {
+    private void checkFoodGroup(Canvas canvas) {
         Bitmap treat;
         //Possible foods
         // Banana
         // Cherry
         // Lime
 
-        if(food instanceof Banana)
+        if(food.getFoodGroup() == 1)
         {
-            treat = food2;
-            Log.i("","FOOD IS BANANA!");
-        } else if(food instanceof Cherry)
-        {
-            treat = food1;
+            treat = cherry;
             Log.i("","FOOD IS CHERRY!");
-        } else if(food instanceof Lime)
+        }
+        else if(food.getFoodGroup() == 2)
         {
-            treat = food3;
+            treat = banana;
+            Log.i("","FOOD IS BANANA!");
+        }
+        else if(food.getFoodGroup() == 3)
+        {
+            treat = lime;
             Log.i("","FOOD IS LIME!");
-        } else
+        }
+        else
         {
             treat = gamePlayBoard;
             Log.i("","FOOD IS not!");
@@ -433,7 +441,7 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         drawFreeCell(canvas, food.getPointLoc(), treat);
     }
 
-    private void drawUniqueClass(Canvas canvas) {
+    private void getUniqueClass(Canvas canvas) {
         if (uniqueClass != null) {
             if (uniqueClass.getType() == AddedObjects.ObjectType.TIMER)
                 // draw timer
@@ -464,18 +472,13 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         }
     }
 
-    private void drawBackground(Canvas canvas) {
+    private void placeBoardDesign(Canvas canvas) {
         paintSnake.setColor(Color.BLACK);
 
         canvas.drawRect(0, 0, pointHere.x * freeCellD, pointHere.y * freeCellD, paintSnake);
     }
 
-    private void drawPoints(Canvas canvas) {
-        String[] text;
-        text = new String[]{"Top: " + hs,
-                    "Score: " + sm.getCurrScore(),
-                    "Time: " + sm.getSlowedPaceRemain()};
-
+    private void displayPoints(Canvas canvas) {
         int textSize = 3 * freeCellD / 2;
         int leftPadding = freeCellD + textSize / 4;
         int topPadding = getWidth() + textSize * 5;
@@ -483,9 +486,13 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         paintSnake.setTextSize(textSize);
         paintSnake.setColor(Color.GREEN);
 
-        canvas.drawText(text[0], leftPadding, topPadding + textSize, paintSnake);
-        canvas.drawText(text[1], leftPadding, topPadding + 2 * textSize, paintSnake);
-        canvas.drawText(text[2], leftPadding, topPadding + 3 * textSize, paintSnake);
+        //needs to be put in a for loop so that the top score, currentscore, timer can be updated
+        // and not overwritten on the screen
+        for(int t = 0; t < 4; t++) {
+            canvas.drawText("Top: " + hs, leftPadding, topPadding + textSize, paintSnake);
+            canvas.drawText("Score: " + sm.getCurrScore(), leftPadding, topPadding + 2 * textSize, paintSnake);
+            canvas.drawText("Timer: " + sm.getRemainingTime(), leftPadding, topPadding + 3 * textSize, paintSnake);
+        }
     }
 
     private void displayAlert(Canvas canvas) {

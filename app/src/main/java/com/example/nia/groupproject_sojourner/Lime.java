@@ -8,7 +8,9 @@ import android.graphics.Point;
 public class Lime extends Food {
     private static final int score = 50;
 
-    public Lime(Point p, SnakeModel snake, int rad){
+    public Lime(Point p, SnakeModel snake, int rad)
+    {
         super(p, snake, rad, score);
+        foodGroup = 3;
     }
 }

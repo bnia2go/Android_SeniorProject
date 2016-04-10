@@ -137,7 +137,7 @@ public class SnakeModel {
     public boolean isVertical(){ return goThisWay.isVert();}
     public void enablePaceIncrementFg(){ paceIncreased = true;}
 
-    public int getSlowedPaceRemain(){ return cc;}
+    public int getRemainingTime(){ return cc;}
     public boolean checkDead(){return stillAlive == 0; }
     public boolean checkUsingPics(){ return getPics;}
     public void destroyIt(){ stillAlive = 0;}

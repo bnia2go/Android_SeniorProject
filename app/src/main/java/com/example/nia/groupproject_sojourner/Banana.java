@@ -12,5 +12,6 @@ public class Banana extends Food {
     public Banana(Point p, SnakeModel snake, int rad)
     {
         super(p, snake, rad, score);
+        foodGroup = 2;
     }
 }

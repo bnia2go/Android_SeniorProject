@@ -8,7 +8,11 @@ import android.graphics.Point;
 public class Cherry extends Food{
     private static final int score = 10;
 
-    public Cherry(Point p, SnakeModel snake, int rad){
+    public Cherry(Point p, SnakeModel snake, int rad)
+    {
         super(p, snake, rad, score);
+        foodGroup = 1;
     }
+
+
 }
