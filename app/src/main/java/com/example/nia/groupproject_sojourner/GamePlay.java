@@ -67,13 +67,9 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
     private UniqueClass uniqueClass;
 
     private String highScoreKey = "highScore";
+    private String [] gameOver = new String []{"CRASHED!", "TAP to PLAY AGAIN."};
     private long hs;
     private boolean updateHighScore;
-
-    private Bitmap gamePlayBoard, snakeProtected;
-    private Bitmap background;
-    private Bitmap cherry, banana, lime;
-    private Bitmap timer, scale;
 
     public GamePlay(Context snakeContext) {
         super(snakeContext);
@@ -89,9 +85,50 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         setFocusable(true);
     }
 
+    private void displayAlert(Canvas canvas) {
+        int size = 3 * freeCellD / 2;
+        int padLeft = freeCellD + size / 4;
+        int padTop = (getHeight() / 2) - 2 * size;
+
+        paintSnake.setTextSize(size);
+        paintSnake.setColor(Color.rgb(255, 255, 102));
+        canvas.drawText(gameOver[0], padLeft, padTop + size, paintSnake);
+        canvas.drawText(gameOver[1], padLeft, padTop + 2 * size, paintSnake);
+    }
+
+    private void displayPoints(Canvas canvas) {
+
+        int s = 3 * freeCellD / 2;
+        int lp = freeCellD + s / 4;
+        int tp =  freeCellD * 20; //getWidth() + s * 5;
+
+        //needs to be put in a for loop so that the top score, currentscore, timer can be updated
+        // and not overwritten on the screen
+        String [] showScore;
+        String top = String.valueOf(hs);
+        String current = String.valueOf(sm.getCurrScore());
+        String time = String.valueOf(sm.getRemainingTime());
+
+        if(sm.getRemainingTime() == 0){
+            showScore = new String [] {"TOP: " + top, "Current: " + current};
+        }
+        else
+            showScore = new String []{"TOP: " + top, "Current: " + current,
+                    "Timer: " + time};
+
+        for(int t = 0; t < showScore.length; t++) {
+            paintSnake.setTextSize(s);
+            paintSnake.setColor(Color.GREEN);
+            canvas.drawText(showScore[t], lp, tp + (t + 1) * s, paintSnake);
+//            canvas.drawText("Top: " + hs, lp, tp + s, paintSnake);
+//            canvas.drawText("Score: " + sm.getCurrScore(), lp, tp + 2 * s, paintSnake);
+//            canvas.drawText("Timer: " + sm.getRemainingTime(), lp, tp + 3 * s, paintSnake);
+        }
+    }
+
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
-
+        //initialize game when main -> gameplay
         initGame();
     }
 
@@ -113,16 +150,6 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
 
             }
         }
-    }
-
-    private void displayPics() {
-        gamePlayBoard = BitmapFactory.decodeResource(getResources(), R.drawable.border);
-        scale = BitmapFactory.decodeResource(getResources(), R.drawable.scale);
-        timer = BitmapFactory.decodeResource(getResources(), R.drawable.clock);
-        cherry = BitmapFactory.decodeResource(getResources(), R.drawable.cherry);
-        banana = BitmapFactory.decodeResource(getResources(), R.drawable.banana);
-        lime = BitmapFactory.decodeResource(getResources(), R.drawable.lime);
-
     }
 
     /**
@@ -267,18 +294,6 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
             sm.setWhichWay(WhichWay.LEFT);
     }
 
-    private void newFood() {
-        Random pickFood = new Random();
-        int pick = pickFood.nextInt(3);
-
-        if (pick <= 1)
-            food = new Cherry(pointHere, sm, freeCellR);
-        else if (pick == 2)
-            food = new Banana(pointHere, sm, freeCellR);
-        else
-            food = new Lime(pointHere, sm, freeCellR);
-    }
-
     private void updateUniqueClass() {
         if (uniqueClass == null) {
             Random random = new Random();
@@ -303,6 +318,10 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
                 uniqueClass = null;
         }
     }
+
+    /*
+        Check if nix hit border
+     */
 
     private void didSnakeHitBorder() {
         Point top = sm.getSnakeHead().getPointLoc();
@@ -332,6 +351,30 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         }
     }
 
+    /*
+        Set the bitmap pics for objects used in game
+     */
+
+    private Bitmap gamePlayBoard, snakeProtected;
+    private Bitmap background;
+    private Bitmap cherry, banana, lime;
+    private Bitmap timer, scale;
+
+    private void displayPics() {
+        gamePlayBoard = BitmapFactory.decodeResource(getResources(), R.drawable.bordergrass);
+        scale = BitmapFactory.decodeResource(getResources(), R.drawable.scale);
+        timer = BitmapFactory.decodeResource(getResources(), R.drawable.clock);
+        cherry = BitmapFactory.decodeResource(getResources(), R.drawable.cherry);
+        banana = BitmapFactory.decodeResource(getResources(), R.drawable.banana);
+        lime = BitmapFactory.decodeResource(getResources(), R.drawable.lime);
+
+    }
+
+    /*
+        Check if nix ate his food.
+        Updates score.
+        Draws new food.
+     */
     public void ateItsFood()
     {
         if (sm.sayAh(food))
@@ -349,38 +392,24 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         }
     }
 
+    private void newFood() {
+        Random pickFood = new Random();
+        int pick = pickFood.nextInt(3);
+
+        if (pick <= 1)
+            food = new Cherry(pointHere, sm, freeCellR);
+        else if (pick == 2)
+            food = new Banana(pointHere, sm, freeCellR);
+        else
+            food = new Lime(pointHere, sm, freeCellR);
+    }
+
     //save score user data
     private void keepScore() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(snakeContext);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putLong(highScoreKey, hs);
         editor.commit();
-    }
-
-    /**
-     * Draw Elements of Game
-     */
-    public void instantDisplay(Canvas canvas) {
-
-        //background
-        placeBoardDesign(canvas);
-
-        //gamePlayBoard around gameplay view
-        drawLining(canvas);
-
-        checkFoodGroup(canvas);
-
-        getUniqueClass(canvas);
-
-        drawNix(canvas);
-
-        displayPoints(canvas);
-
-        //display crash message if Nix died
-        if (sm.checkDead())
-        {
-            displayAlert(canvas);
-        }
     }
 
     //where to draw each AddedObject Type
@@ -393,6 +422,10 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
 
         canvas.drawBitmap(bitmap, main, distance, paintSnake);
     }
+
+    /*
+        Draws lining around gameboard
+     */
 
     private void drawLining(Canvas canvas) {
         paintSnake.setColor(Color.BLACK);
@@ -441,6 +474,9 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         drawFreeCell(canvas, food.getPointLoc(), treat);
     }
 
+    /*
+        Retrieves and draws timer elements
+     */
     private void getUniqueClass(Canvas canvas) {
         if (uniqueClass != null) {
             if (uniqueClass.getType() == AddedObjects.ObjectType.TIMER)
@@ -451,6 +487,9 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         }
     }
 
+    /*
+        This method updates the state of nix and draws it.
+     */
     private void drawNix(Canvas canvas) {
         if (sm.checkUsingPics()) {
             for (FreeCell freeCell : sm.getFreeCells())
@@ -474,45 +513,33 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
 
     private void placeBoardDesign(Canvas canvas) {
         paintSnake.setColor(Color.BLACK);
-
         canvas.drawRect(0, 0, pointHere.x * freeCellD, pointHere.y * freeCellD, paintSnake);
     }
 
-    private void displayPoints(Canvas canvas) {
-        int textSize = 3 * freeCellD / 2;
-        int leftPadding = freeCellD + textSize / 4;
-        int topPadding = getWidth() + textSize * 5;
+    /**
+     * Draw Elements of Game
+     */
+    public void instantDisplay(Canvas canvas) {
 
-        paintSnake.setTextSize(textSize);
-        paintSnake.setColor(Color.GREEN);
+        //background
+        placeBoardDesign(canvas);
 
-        //needs to be put in a for loop so that the top score, currentscore, timer can be updated
-        // and not overwritten on the screen
-        for(int t = 0; t < 4; t++) {
-            canvas.drawText("Top: " + hs, leftPadding, topPadding + textSize, paintSnake);
-            canvas.drawText("Score: " + sm.getCurrScore(), leftPadding, topPadding + 2 * textSize, paintSnake);
-            canvas.drawText("Timer: " + sm.getRemainingTime(), leftPadding, topPadding + 3 * textSize, paintSnake);
+        //gamePlayBoard around gameplay view
+        drawLining(canvas);
+
+        checkFoodGroup(canvas);
+
+        getUniqueClass(canvas);
+
+        drawNix(canvas);
+
+        displayPoints(canvas);
+
+        //display crash message if Nix died
+        if (sm.checkDead())
+        {
+            displayAlert(canvas);
         }
     }
-
-    private void displayAlert(Canvas canvas) {
-        String[] text = new String[]{"CRASHED!", "TAP to PLAY AGAIN."};
-
-        int textSize = 3 * freeCellD / 2;
-        int leftPadding = freeCellD + textSize / 4;
-        int topPadding = getHeight() / 2 - text.length * textSize;
-
-        paintSnake.setTextSize(textSize);
-        paintSnake.setColor(Color.rgb(255,255,102));
-        canvas.drawText(text[0], leftPadding, topPadding + textSize, paintSnake);
-        canvas.drawText(text[1], leftPadding, topPadding + 2 * textSize, paintSnake);
-    }
-
-
-    /*public void goBack(){
-
-    }*/
-
-
 
 }
