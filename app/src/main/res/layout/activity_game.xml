@@ -38,7 +38,7 @@
         android:layout_marginLeft="200dp"
         android:layout_height="80px"
         android:layout_width="150px"
-        android:onClick="playSnake"
+        android:onClick="playNix"
         />
 
     <Button
