@@ -2,7 +2,6 @@ package com.example.nia.groupproject_sojourner;
 import java.util.ArrayDeque;
 import java.util.Random;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,38 +15,6 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Point;
-import android.os.Bundle;
-import android.graphics.drawable.Drawable;
-import android.preference.PreferenceManager;
-import android.view.SurfaceHolder;
-import android.view.View;
-import android.app.Activity;
-import android.support.v7.widget.Toolbar;
-import android.view.WindowManager;
-import android.widget.TextView;
-import android.widget.ImageView;
-import android.widget.Button;
-import android.graphics.Paint;
-import android.graphics.Color;
-import android.util.Log;
-import android.graphics.Rect;
-import android.view.MotionEvent;
-import android.view.Menu;
-import android.widget.RelativeLayout;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.graphics.Canvas;
-import android.content.Context;
-import android.content.ContextWrapper;
-
-import java.util.ArrayDeque;
-import java.util.Random;
 
 /**
  * Created by Nia on 12/5/2015.
@@ -120,9 +87,6 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
             paintSnake.setTextSize(s);
             paintSnake.setColor(Color.GREEN);
             canvas.drawText(showScore[t], lp, tp + (t + 1) * s, paintSnake);
-//            canvas.drawText("Top: " + hs, lp, tp + s, paintSnake);
-//            canvas.drawText("Score: " + sm.getCurrScore(), lp, tp + 2 * s, paintSnake);
-//            canvas.drawText("Timer: " + sm.getRemainingTime(), lp, tp + 3 * s, paintSnake);
         }
     }
 
@@ -168,7 +132,7 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         int boardWidth = 20;
         freeCellD = getWidth() / boardWidth;
         freeCellR = freeCellD / 2;
-        int boardHeight = 1500 / freeCellD;
+        int boardHeight = getHeight() / freeCellD;
         pointHere = new Point(boardWidth, boardHeight);
 
         sm = new SnakeModel(freeCellR, (gamePlayBoard != null && scale != null && cherry != null));
@@ -243,7 +207,7 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         } else {
             WhichWay ww = whichWay.isEmpty() ? sm.moveThisWay() : whichWay.getLast();
 
-            if (ww.isHoriz()) {
+            if (ww.isHorizontal()) {
                 // if snake is moving along x axis
                 // if touch above/below of the head
                 if (hor < sm.getSnakeHead().getPointLoc().y * freeCellD) {
@@ -272,25 +236,25 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
 
     @Override
     public void b2top(View v) {
-        if (sm.moveThisWay().isHoriz())
+        if (sm.moveThisWay().isHorizontal())
             sm.setWhichWay(WhichWay.UP);
     }
 
     @Override
     public void t2bottom(View v) {
-        if (sm.moveThisWay().isHoriz())
+        if (sm.moveThisWay().isHorizontal())
             sm.setWhichWay(WhichWay.DOWN);
     }
 
     @Override
     public void l2right(View v) {
-        if (sm.moveThisWay().isVert())
+        if (sm.moveThisWay().isVertical())
             sm.setWhichWay(WhichWay.RIGHT);
     }
 
     @Override
     public void r2left(View v) {
-        if (sm.moveThisWay().isVert())
+        if (sm.moveThisWay().isVertical())
             sm.setWhichWay(WhichWay.LEFT);
     }
 
@@ -355,8 +319,7 @@ public class GamePlay extends SurfaceView implements SurfaceHolder.Callback, Tou
         Set the bitmap pics for objects used in game
      */
 
-    private Bitmap gamePlayBoard, snakeProtected;
-    private Bitmap background;
+    private Bitmap gamePlayBoard;
     private Bitmap cherry, banana, lime;
     private Bitmap timer, scale;
 

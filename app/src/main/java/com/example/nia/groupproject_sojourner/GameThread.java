@@ -33,7 +33,6 @@ public class GameThread extends  Thread {
         super();
         this.surfaceHolder = surfaceHolder;
         this.gamePlay = gamePlay;
-        //running = true;
     }
 
     public static void setRunning(boolean running) {

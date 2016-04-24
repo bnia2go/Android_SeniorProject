@@ -1,7 +1,7 @@
 package com.example.nia.groupproject_sojourner;
 
 import android.graphics.Point;
-import android.util.Log;
+
 import java.util.ArrayDeque;
 /**
  * Created by Nia on 3/4/2016.
@@ -133,8 +133,8 @@ public class SnakeModel {
 
     public int getPaceDelay(){return (int)Math.round(nextMPace);}
     public boolean increasePace(){ return paceIncreased;}
-    public boolean isHorizontal(){ return goThisWay.isHoriz();}
-    public boolean isVertical(){ return goThisWay.isVert();}
+    public boolean isHorizontal(){ return goThisWay.isHorizontal();}
+    public boolean isVertical(){ return goThisWay.isVertical();}
     public void enablePaceIncrementFg(){ paceIncreased = true;}
 
     public int getRemainingTime(){ return cc;}

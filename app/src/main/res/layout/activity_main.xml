@@ -12,24 +12,25 @@
         android:text="NIX"
         android:textColor="#996633"
         android:id="@+id/label"
-        android:layout_margin="100sp"
         android:textSize="90sp"
         android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-    />
+        android:layout_marginTop="109dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/playButton"
+        android:layout_alignEnd="@+id/playButton" />
 
     <Button
         android:text="PLAY"
         android:id="@+id/playButton"
         android:textSize="55dp"
-        android:layout_below="@id/label"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:background="#889933"
         android:onClick="playGame"
-    />
+        android:layout_below="@+id/label"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="93dp" />
 
 </RelativeLayout>

@@ -15,16 +15,12 @@ public enum WhichWay {
         this.dir = dir;
     }
 
-    public int getDir() {
-        return dir;
-    }
-
-    public boolean isHoriz() {
+    public boolean isHorizontal() {
         return dir == 0 || dir == 2;
     }
 
-    public boolean isVert() {
-        return !isHoriz();
+    public boolean isVertical() {
+        return !isHorizontal();
     }
 
 }
