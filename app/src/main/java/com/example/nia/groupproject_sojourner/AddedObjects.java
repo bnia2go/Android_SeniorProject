@@ -4,7 +4,6 @@ package com.example.nia.groupproject_sojourner;
  * Created by Nia on 3/3/2016.
  */
 import android.graphics.Point;
-import android.util.Log;
 import java.util.Random;
 
 //this class generates new locations for FOOD and TIMER
